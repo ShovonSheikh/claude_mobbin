@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Mobbin Vault</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobbin Vault - Dashboard</title>
   <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
   <div class="layout">
     
+    <!-- Sidebar Navigation -->
     <aside class="sidebar-nav">
       <div class="brand">
         <div class="brand-icon">M</div>
@@ -17,69 +19,180 @@
       </div>
       
       <nav>
-        <button id="nav-library" class="nav-item active">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <button id="nav-library" class="nav-item active" data-view="library">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
           Library
         </button>
       </nav>
 
       <div class="sidebar-footer">
+        <div class="storage-info">
+          <div class="storage-text">
+            <span id="storage-used">0 MB</span>
+            <span class="storage-label">used</span>
+          </div>
+          <div class="storage-bar">
+            <div id="storage-progress" class="storage-progress"></div>
+          </div>
+        </div>
+        
         <button id="btn-clear" class="nav-item danger">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-          Clear Data
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          Clear All Data
         </button>
       </div>
     </aside>
 
+    <!-- Main Content Area -->
     <main class="main-content">
       
+      <!-- Top Bar -->
       <header class="top-bar">
-        <h1 id="page-title">Library</h1>
-        <div id="detail-actions" class="hidden">
-          <button id="btn-back" class="btn-outline">← Back</button>
-          <button id="btn-download-all" class="btn-primary">Download All</button>
+        <div class="top-bar-left">
+          <h1 id="page-title">Library</h1>
+          <span id="app-count" class="subtitle">0 apps</span>
+        </div>
+        
+        <div class="top-bar-right">
+          <!-- Library Controls -->
+          <div id="library-controls" class="controls-group">
+            <div class="search-box">
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input 
+                type="text" 
+                id="search-input" 
+                placeholder="Search apps..." 
+                autocomplete="off"
+              >
+              <button id="clear-search" class="clear-btn" style="display:none;">✕</button>
+            </div>
+            
+            <select id="sort-select" class="sort-select">
+              <option value="recent">Recently Added</option>
+              <option value="name">Name (A-Z)</option>
+              <option value="screens">Most Screens</option>
+            </select>
+          </div>
+          
+          <!-- Detail View Controls -->
+          <div id="detail-actions" class="hidden">
+            <button id="btn-back" class="btn-outline">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              Back
+            </button>
+            <button id="btn-delete-app" class="btn-danger">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              Delete App
+            </button>
+            <button id="btn-download-all" class="btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Download All
+            </button>
+          </div>
         </div>
       </header>
 
+      <!-- Library View -->
       <div id="view-library" class="view active">
-        <div id="library-grid" class="grid-apps">
-          </div>
+        <!-- Loading State -->
+        <div id="loading-state" class="loading-state">
+          <div class="spinner-large"></div>
+          <p>Loading your collection...</p>
+        </div>
+
+        <!-- Apps Grid -->
+        <div id="library-grid" class="grid-apps"></div>
+        
+        <!-- Empty State -->
         <div id="empty-state" class="empty-state hidden">
-          <div class="empty-icon">📂</div>
+          <div class="empty-icon">📱</div>
           <h3>No apps collected yet</h3>
-          <p>Open Mobbin.com, click the extension icon, and hit "Scan".</p>
+          <p>Visit Mobbin.com, open any app, and click the extension to scan screens.</p>
+          <button id="btn-open-mobbin" class="btn-primary">Open Mobbin.com</button>
+        </div>
+
+        <!-- No Results State -->
+        <div id="no-results-state" class="empty-state hidden">
+          <div class="empty-icon">🔍</div>
+          <h3>No apps found</h3>
+          <p id="search-query-text">Try a different search term</p>
+          <button id="btn-clear-search" class="btn-outline">Clear Search</button>
         </div>
       </div>
 
+      <!-- Detail View -->
       <div id="view-detail" class="view hidden">
         <div class="detail-meta">
-          <img id="detail-logo" src="" alt="Logo">
+          <img id="detail-logo" src="" alt="App Logo">
           <div>
             <h2 id="detail-name">App Name</h2>
-            <span id="detail-count">0 screens</span>
+            <div class="detail-info">
+              <span id="detail-count">0 screens</span>
+              <span class="separator">•</span>
+              <span id="detail-date">Added recently</span>
+            </div>
           </div>
         </div>
-        <div id="detail-grid" class="grid-screens">
-          </div>
+        
+        <!-- Loading State for Screens -->
+        <div id="screens-loading" class="loading-state-inline">
+          <div class="spinner-small"></div>
+          <span>Loading screens...</span>
+        </div>
+        
+        <div id="detail-grid" class="grid-screens"></div>
       </div>
 
     </main>
   </div>
 
+  <!-- Preview Sidebar -->
   <div id="preview-sidebar" class="preview-panel">
     <div class="preview-header">
       <h3>Preview</h3>
-      <button id="btn-close-sidebar" class="btn-icon">✕</button>
+      <button id="btn-close-sidebar" class="btn-icon" title="Close (ESC)">✕</button>
     </div>
     <div class="preview-body">
-      <img id="sidebar-image" src="" alt="Preview">
+      <img id="sidebar-image" src="" alt="Screen Preview">
     </div>
     <div class="preview-footer">
-      <button id="btn-download-current" class="btn-primary full-width">Download Image</button>
+      <button id="btn-download-current" class="btn-primary full-width">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Download Image
+      </button>
     </div>
   </div>
   
+  <!-- Overlay -->
   <div id="overlay" class="overlay"></div>
+
+  <!-- Toast Notifications -->
+  <div id="toast-container" class="toast-container"></div>
 
   <script src="dashboard.js"></script>
 </body>
