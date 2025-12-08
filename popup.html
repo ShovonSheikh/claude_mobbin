@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mobbin Vault</title>
+  <style>
+    body {
+      width: 300px;
+      height: 400px;
+      margin: 0;
+      background-color: #000000;
+      color: #FFFFFF;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 30px 0;
+    }
+
+    /* Logo Placeholder Area */
+    .logo-container {
+      width: 100px;
+      height: 100px;
+      background-color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .logo-placeholder {
+      color: #666;
+      font-size: 12px;
+    }
+
+    .app-name {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 30px;
+      min-height: 22px; /* Prevent layout shift */
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover { opacity: 0.9; }
+
+    .btn-white {
+      background-color: #FFFFFF;
+      color: #000000;
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid #FFFFFF;
+      color: #FFFFFF;
+    }
+
+    /* SVG Icon style */
+    .icon-search {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .status-msg {
+      font-size: 12px;
+      color: #888;
+      margin-top: 10px;
+      height: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Mobbin Vault</h1>
+
+  <div class="logo-container">
+    <img id="app-logo" src="" alt="" style="display:none;">
+    <span id="logo-text" class="logo-placeholder">{app_icon}</span>
+  </div>
+
+  <div id="app-name" class="app-name">{app_name}</div>
+
+  <button id="btn-scan" class="btn btn-white">
+    Scan
+    <svg class="icon-search" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+  </button>
+
+  <button id="btn-dashboard" class="btn btn-white">
+    Dashboard
+  </button>
+
+  <div id="status" class="status-msg"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Mobbin Manager",
+  "version": "1.1",
+  "description": "Scrape and manage UI design inspiration in a local B&W dashboard.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "downloads"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Mobbin Vault"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

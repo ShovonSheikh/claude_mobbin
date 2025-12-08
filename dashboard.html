@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mobbin Manager</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header>
+    <div class="logo">MOBBIN MANAGER</div>
+    <div class="actions">
+      <button id="btn-clear" class="btn-text">Clear All</button>
+    </div>
+  </header>
+
+  <main id="app-container">
+    
+    <div id="view-library" class="view active">
+      <div id="library-grid" class="grid-layout">
+        </div>
+      <div id="empty-state" class="hidden">
+        <p>No apps collected yet.</p>
+        <p style="color: #666; font-size: 0.9em; margin-top:8px;">Go to Mobbin.com, click the extension icon, and hit "Scan".</p>
+      </div>
+    </div>
+
+    <div id="view-detail" class="view hidden">
+      <div class="detail-header">
+        <button id="btn-back" class="btn-icon">← Back</button>
+        <div class="app-info">
+          <img id="detail-logo" src="" alt="Logo">
+          <h2 id="detail-title">App Name</h2>
+        </div>
+        <button id="btn-download-all" class="btn-secondary">Download All</button>
+      </div>
+      <div id="detail-grid" class="masonry-layout">
+        </div>
+    </div>
+
+  </main>
+
+  <div id="preview-sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title">Preview</span>
+      <button id="btn-close-sidebar" class="btn-icon">×</button>
+    </div>
+    <div class="sidebar-content">
+      <img id="sidebar-image" src="" alt="Full Preview">
+    </div>
+    <div class="sidebar-footer">
+      <button id="btn-download-current" class="btn-primary full-width">Download Image</button>
+    </div>
+  </div>
+  
+  <div id="overlay" class="overlay"></div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
