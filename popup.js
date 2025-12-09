@@ -110,7 +110,7 @@ function attachEventListeners() {
   // Scan button
   elements.btnScan.addEventListener('click', handleScan);
 
-  // Dashboard button
+  // Dashboard button - ALWAYS enabled
   elements.btnDash.addEventListener('click', () => {
     chrome.tabs.create({ url: "dashboard.html" });
   });
@@ -227,8 +227,8 @@ function showErrorState(message) {
   elements.actionButtons.style.display = "none";
   elements.appName.textContent = message;
   
-  // Still allow dashboard access
-  elements.btnDash.style.display = "flex";
+  // Disable scan button but keep dashboard button always enabled
+  elements.btnScan.disabled = true;
 }
 
 /**

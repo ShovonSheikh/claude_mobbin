@@ -248,14 +248,17 @@ function createAppCard(app) {
   const card = document.createElement('div');
   card.className = 'app-card';
   
-  const logoSrc = app.logo || `https://via.placeholder.com/100?text=${encodeURIComponent(app.name.charAt(0))}`;
+  // Use placeholder as fallback
+  const logoSrc = (app.logo && !app.logo.includes('placeholder')) 
+    ? app.logo 
+    : `https://via.placeholder.com/100/1a1a1a/666?text=${encodeURIComponent(app.name.charAt(0))}`;
   
   const dateStr = app.dateAdded 
     ? formatDate(app.dateAdded) 
     : 'Recently';
   
   card.innerHTML = `
-    <img class="app-logo" src="${sanitizeUrl(logoSrc)}" loading="lazy" alt="${sanitizeText(app.name)}">
+    <img class="app-logo" src="${sanitizeUrl(logoSrc)}" loading="lazy" alt="${sanitizeText(app.name)}" onerror="this.onerror=null; this.src='https://via.placeholder.com/100/1a1a1a/666?text=${encodeURIComponent(app.name.charAt(0))}'; this.style.objectFit='contain'; this.style.padding='20px';">
     <div class="app-title">${sanitizeText(app.name)}</div>
     <div class="app-meta">
       <span>${app.screenCount} screen${app.screenCount !== 1 ? 's' : ''}</span>
@@ -308,8 +311,21 @@ async function openDetail(app) {
   document.getElementById('detail-date').textContent = 
     `Added ${formatDate(app.dateAdded)}`;
   
-  const logoSrc = app.logo || `https://via.placeholder.com/100?text=${encodeURIComponent(app.name.charAt(0))}`;
-  document.getElementById('detail-logo').src = sanitizeUrl(logoSrc);
+  // Use placeholder as fallback with better styling
+  const logoSrc = (app.logo && !app.logo.includes('placeholder')) 
+    ? app.logo 
+    : `https://via.placeholder.com/100/1a1a1a/666?text=${encodeURIComponent(app.name.charAt(0))}`;
+  
+  const logoEl = document.getElementById('detail-logo');
+  logoEl.src = sanitizeUrl(logoSrc);
+  
+  // Handle logo load error
+  logoEl.onerror = () => {
+    logoEl.onerror = null;
+    logoEl.src = `https://via.placeholder.com/100/1a1a1a/666?text=${encodeURIComponent(app.name.charAt(0))}`;
+    logoEl.style.objectFit = 'contain';
+    logoEl.style.padding = '12px';
+  };
   
   // Show loading state for screens
   elements.screensLoading.style.display = 'flex';
