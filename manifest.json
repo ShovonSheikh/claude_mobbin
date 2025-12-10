@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Mobbin Vault",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Scrape and manage UI design inspiration from Mobbin.com with a beautiful local dashboard.",
   "permissions": [
     "activeTab",
@@ -11,7 +11,8 @@
     "notifications"
   ],
   "host_permissions": [
-    "https://mobbin.com/*"
+    "https://mobbin.com/*",
+    "https://www.mobbin.com/*"
   ],
   "icons": {
     "16": "icons/icon16.png",
@@ -32,6 +33,19 @@
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mobbin.com/*",
+        "https://www.mobbin.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": false
+    }
+  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
   },

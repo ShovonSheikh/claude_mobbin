@@ -1,10 +1,12 @@
-// popup.js - v3
-// Popup interface logic with improved error handling
+// popup.js - v3 (FIXED)
+// Popup interface logic with improved error handling and content script injection
 
 const CONFIG = {
   SCAN_TIMEOUT: 120000, // 2 minutes
   SUCCESS_DISPLAY_TIME: 3000,
-  MOBBIN_DOMAIN: 'mobbin.com'
+  MOBBIN_DOMAIN: 'mobbin.com',
+  INJECTION_RETRY_DELAY: 500,
+  MAX_INJECTION_RETRIES: 3
 };
 
 const elements = {
@@ -44,36 +46,144 @@ async function initializePopup() {
       return;
     }
 
-    // Inject content script
-    await injectContentScript();
+    // Check if page is still loading
+    if (currentTab.status === 'loading') {
+      updateStatus("Waiting for page to load...", 'info');
+      await waitForPageLoad();
+    }
+
+    // Inject content script with retry
+    const injected = await injectContentScriptWithRetry();
+    if (!injected) {
+      showErrorState("Failed to connect to page");
+      updateStatus("Try refreshing the page", 'error');
+      return;
+    }
 
     // Get page metadata
-    const meta = await getPageMeta();
+    const meta = await getPageMetaWithRetry();
     if (meta && !meta.error) {
       updateUI(meta);
+      updateStatus("Ready to scan", 'success');
     } else {
       showErrorState("Could not read page data");
+      updateStatus("Page may not be fully loaded", 'warning');
     }
 
   } catch (error) {
     console.error('Initialization error:', error);
     showErrorState("Failed to initialize");
+    updateStatus(error.message || "Unknown error", 'error');
   }
 }
 
 /**
- * Inject content script into page
+ * Wait for page to finish loading
  */
-async function injectContentScript() {
-  try {
-    await chrome.scripting.executeScript({
-      target: { tabId: currentTab.id },
-      files: ['content.js']
-    });
-  } catch (error) {
-    // Script might already be injected
-    console.debug('Script injection:', error);
+function waitForPageLoad() {
+  return new Promise((resolve) => {
+    const checkInterval = setInterval(async () => {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab && tab.status === 'complete') {
+        clearInterval(checkInterval);
+        currentTab = tab;
+        resolve();
+      }
+    }, 100);
+
+    // Timeout after 10 seconds
+    setTimeout(() => {
+      clearInterval(checkInterval);
+      resolve();
+    }, 10000);
+  });
+}
+
+/**
+ * Inject content script with retry logic
+ */
+async function injectContentScriptWithRetry() {
+  for (let attempt = 0; attempt < CONFIG.MAX_INJECTION_RETRIES; attempt++) {
+    try {
+      // First, check if content script is already injected
+      const isInjected = await checkContentScriptInjected();
+      if (isInjected) {
+        console.log('Content script already injected');
+        return true;
+      }
+
+      // Try to inject
+      await chrome.scripting.executeScript({
+        target: { tabId: currentTab.id },
+        files: ['content.js']
+      });
+
+      // Wait a bit for script to initialize
+      await sleep(CONFIG.INJECTION_RETRY_DELAY);
+
+      // Verify injection worked
+      const verified = await checkContentScriptInjected();
+      if (verified) {
+        console.log('Content script injected successfully');
+        return true;
+      }
+
+    } catch (error) {
+      console.warn(`Injection attempt ${attempt + 1} failed:`, error);
+      
+      // If it's a "Cannot access" error, the page is restricted
+      if (error.message && error.message.includes('Cannot access')) {
+        console.error('Cannot inject into this page (restricted)');
+        return false;
+      }
+
+      if (attempt < CONFIG.MAX_INJECTION_RETRIES - 1) {
+        await sleep(CONFIG.INJECTION_RETRY_DELAY * (attempt + 1));
+      }
+    }
   }
+
+  console.error('All injection attempts failed');
+  return false;
+}
+
+/**
+ * Check if content script is already injected
+ */
+function checkContentScriptInjected() {
+  return new Promise((resolve) => {
+    chrome.tabs.sendMessage(
+      currentTab.id,
+      { action: "ping" },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      }
+    );
+  });
+}
+
+/**
+ * Get page metadata with retry
+ */
+async function getPageMetaWithRetry() {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const meta = await getPageMeta();
+      if (meta && !meta.error) {
+        return meta;
+      }
+    } catch (error) {
+      console.warn(`Meta fetch attempt ${attempt + 1} failed:`, error);
+      if (attempt < 2) {
+        await sleep(300);
+      }
+    }
+  }
+  return { error: "Failed to fetch metadata" };
 }
 
 /**
@@ -81,15 +191,21 @@ async function injectContentScript() {
  */
 function getPageMeta() {
   return new Promise((resolve) => {
+    const timeout = setTimeout(() => {
+      resolve({ error: "Timeout" });
+    }, 5000);
+
     chrome.tabs.sendMessage(
-      currentTab.id, 
-      { action: "get_meta" }, 
+      currentTab.id,
+      { action: "get_meta" },
       (response) => {
+        clearTimeout(timeout);
+        
         if (chrome.runtime.lastError) {
           console.error('Meta fetch error:', chrome.runtime.lastError);
           resolve({ error: chrome.runtime.lastError.message });
         } else {
-          resolve(response);
+          resolve(response || { error: "No response" });
         }
       }
     );
@@ -127,28 +243,24 @@ async function handleScan() {
     setScanning(true);
     updateStatus("Initializing scan...", 'info');
 
+    // Verify content script is still available
+    const isAvailable = await checkContentScriptInjected();
+    if (!isAvailable) {
+      throw new Error("Lost connection to page. Try refreshing.");
+    }
+
     // Set timeout for long scans
     scanTimeout = setTimeout(() => {
       updateStatus("Scan taking longer than expected...", 'warning');
     }, 30000); // 30 seconds
 
-    // Start scrape
-    const response = await new Promise((resolve) => {
-      chrome.tabs.sendMessage(
-        currentTab.id,
-        { action: "start_scrape" },
-        (response) => {
-          if (chrome.runtime.lastError) {
-            resolve({ 
-              status: "error", 
-              message: chrome.runtime.lastError.message 
-            });
-          } else {
-            resolve(response);
-          }
-        }
-      );
-    });
+    // Start scrape with timeout
+    const response = await Promise.race([
+      sendScrapeMessage(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Scan timeout - page may be too large")), CONFIG.SCAN_TIMEOUT)
+      )
+    ]);
 
     clearTimeout(scanTimeout);
 
@@ -181,6 +293,27 @@ async function handleScan() {
     updateStatus(error.message || "Scan failed. Please try again.", 'error');
     setScanning(false);
   }
+}
+
+/**
+ * Send scrape message to content script
+ */
+function sendScrapeMessage() {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.sendMessage(
+      currentTab.id,
+      { action: "start_scrape" },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+        } else if (!response) {
+          reject(new Error("No response from content script"));
+        } else {
+          resolve(response);
+        }
+      }
+    );
+  });
 }
 
 /**
@@ -237,4 +370,11 @@ function showErrorState(message) {
 function updateStatus(text, type = 'info') {
   elements.status.textContent = text;
   elements.status.className = `status-msg ${type}`;
+}
+
+/**
+ * Sleep helper
+ */
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
